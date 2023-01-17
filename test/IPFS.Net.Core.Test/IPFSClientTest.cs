@@ -72,4 +72,25 @@ public sealed class IPFSClientTest
         var hash = await client.AddAsync("/Users/dwgoing/Desktop/test/", options);
         Assert.True(!string.IsNullOrEmpty(hash));
     }
+
+    [Fact]
+    public async void Cat()
+    {
+        var client = CreateClient();
+        var data = await client.CatAsync("QmYW5NxdEe2j8BW1u1VeDn8uDAiZRCi2tdunKXopoEAK1X");
+        Assert.True(!string.IsNullOrEmpty(data));
+    }
+
+    [Fact]
+    public async void CatWithOffsetOptionAndLengthOption()
+    {
+        var client = CreateClient();
+        var options = new CatOptions()
+        {
+            Offset = 2,
+            Length = 5
+        };
+        var data = await client.CatAsync("QmYW5NxdEe2j8BW1u1VeDn8uDAiZRCi2tdunKXopoEAK1X", options);
+        Assert.True(!string.IsNullOrEmpty(data));
+    }
 }

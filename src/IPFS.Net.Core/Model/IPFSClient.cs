@@ -31,9 +31,10 @@ public sealed class IPFSClient
     /// <summary>
     /// 解析参数
     /// </summary>
+    /// <param name="uri"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    private string ParseArguments(object options)
+    private string ParseArguments(string uri, object options)
     {
         var builder = new StringBuilder();
         var type = options.GetType();
@@ -50,7 +51,7 @@ public sealed class IPFSClient
             if (builder.Length > 0) builder.Append("&");
             builder.Append($"{key}={value}");
         }
-        return builder.Length > 0 ? $"?{builder}" : string.Empty;
+        return $"{uri}{(builder.Length > 0 ? $"?{builder}" : string.Empty)}";
     }
 
     /// <summary>
@@ -84,7 +85,7 @@ public sealed class IPFSClient
     {
         if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
         var uri = "/api/v0/add";
-        if (options is not null) uri += ParseArguments(options);
+        if (options is not null) uri = ParseArguments(uri, options);
         using var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
         using var content = new MultipartFormDataContent();
         string hashName;
@@ -136,5 +137,24 @@ public sealed class IPFSClient
             line = await reader.ReadLineAsync();
         }
         return result.Hash;
+    }
+
+    /// <summary>
+    /// 显示IPFS对象数据
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    public async Task<string> CatAsync(string path, CatOptions options = null)
+    {
+        if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+        var uri = "/api/v0/cat";
+        if (options is not null) uri = ParseArguments(uri, options);
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+        using var content = new MultipartFormDataContent();
+        content.Add(new StringContent(path));
+        requestMessage.Content = content;
+        var response = await SendRequestAsync(requestMessage);
+        return Encoding.UTF8.GetString(response);
     }
 }
