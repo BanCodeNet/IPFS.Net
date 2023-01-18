@@ -93,4 +93,15 @@ public sealed class IPFSClientTest
         var data = await client.CatAsync("QmYW5NxdEe2j8BW1u1VeDn8uDAiZRCi2tdunKXopoEAK1X", options);
         Assert.True(!string.IsNullOrEmpty(data));
     }
+
+    [Fact]
+    public async void Get()
+    {
+        var client = CreateClient();
+        var data = await client.GetAsync("QmU8Qij2C9yzPS5zNPWsBAnTrAZw2iYimsA4ggUQy1aYA8");
+        using var file = File.Create("/Users/dwgoing/Desktop/test/output.zip");
+        data.Seek(0, SeekOrigin.Begin);
+        data.CopyTo(file);
+        Assert.True(file.Length > 0);
+    }
 }

@@ -157,4 +157,23 @@ public sealed class IPFSClient
         var response = await SendRequestAsync(requestMessage);
         return Encoding.UTF8.GetString(response);
     }
+
+    /// <summary>
+    /// 下载IPFS对象
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    public async Task<Stream> GetAsync(string path, GetOptions options = null)
+    {
+        if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+        var uri = "/api/v0/get";
+        if (options is not null) uri = ParseArguments(uri, options);
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+        using var content = new MultipartFormDataContent();
+        content.Add(new StringContent(path));
+        requestMessage.Content = content;
+        var response = await SendRequestAsync(requestMessage);
+        return new MemoryStream(response);
+    }
 }
